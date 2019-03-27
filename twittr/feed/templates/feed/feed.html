@@ -1,0 +1,16 @@
+{% extends 'feed/base.html' %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+<h4>{{ user.username }}'s Feed</h4>
+<form method="POST">
+  {% csrf_token %}
+  {{ form }}
+  <button type="submit">Tweet</button>
+</form>
+{% else %}      
+<p>Log in or Register!</p>
+{% endif %}      
+
+{% endblock %}

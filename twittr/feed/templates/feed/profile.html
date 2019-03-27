@@ -1,0 +1,21 @@
+{% extends 'feed/base.html' %}
+
+{% block content %}
+
+{% if user.is_authenticated %}
+    <h4>{{ user.username }}'s Profile</h4>
+{% endif %}
+
+{% if tweets %}
+    <table>
+    {% for tweet in tweets %}
+        <tr>
+            <td>{{ tweet.tweet_content }}</td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>{{ user.username }} has not tweeted yet.</p>
+{% endif %}
+
+{% endblock %}
