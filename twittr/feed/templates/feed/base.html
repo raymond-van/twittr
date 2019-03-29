@@ -10,8 +10,8 @@
           <a href="/" class="brand-logo">Twittr</a>
           <ul id="nav-mobile" class="right hide-on-med-and-down">
             {% if user.is_authenticated %}
-              <!-- {% url 'profile' username=user.username as profile %} -->
-              <li><a href="{{ user.username }}">{{user.username}}</a></li>
+              <li><a href="{{ user.username }}">{{ user.username }}</a></li>
+              <li>Tweet</li>
               <li><a href='/logout'>Log out</a></li>
             {% else %}      
               <li><a href='/login'>Log in</a></li>

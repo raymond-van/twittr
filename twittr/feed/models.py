@@ -18,7 +18,7 @@ class Follower(models.Model):
     followed = models.ForeignKey(User, on_delete= models.CASCADE, related_name= 'm_followed')
 
     def __str__(self):
-        return f'{self.follower} is following {self.followed}'
+        return f'{self.follower} following {self.followed}'
 
     # user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='user', on_delete=models.CASCADE)
     # following = models.ManyToManyField('self', related_name='follower', symmetrical=False, blank=True, null=True)

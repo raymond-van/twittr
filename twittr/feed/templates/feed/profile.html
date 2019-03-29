@@ -3,19 +3,48 @@
 {% block content %}
 
 {% if user.is_authenticated %}
-    <h4>{{ user.username }}'s Profile</h4>
+    <h4>{{ profile.username }}'s Profile</h4>
+{% endif %}
+
+{% if user.username != profile.username %}
+    <div>
+        <button>Follow</button>
+    </div>
 {% endif %}
 
 {% if tweets %}
     <table>
-    {% for tweet in tweets %}
+    Tweets ({{ tweets.count }}):
+    {% for tweet in tweets reversed %}
         <tr>
             <td>{{ tweet.tweet_content }}</td>
         </tr>
     {% endfor %}
     </table>
 {% else %}
-    <p>{{ user.username }} has not tweeted yet.</p>
+    <p>{{ profile.username }} has not tweeted yet.</p>
+{% endif %}
+
+{% if following %}
+    <ul>
+    Following ({{ following.count }}):
+    {% for follow in following %}
+        <li>{{ follow.followed }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>{{ profile.username }} is not following anyone.</p>
+{% endif %}
+
+{% if followers %}
+    <ul>
+    Followers ({{ followers.count }}):
+    {% for follower in followers %}
+        <li>{{ follower.follower }}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>{{ profile.username }} has no followers.</p>
 {% endif %}
 
 {% endblock %}

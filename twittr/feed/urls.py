@@ -9,6 +9,6 @@ urlpatterns = [
     path('login/', views.login_req, name='login'),
     path('logout/', views.logout_req, name='logout'),
     path('register/', views.register, name='register'),
-    path('<str:username>/', views.profile, name='profile'),
+    path('<str:profile>/', views.profile, name='profile'),
     path('admin', admin.site.urls),
 ]
