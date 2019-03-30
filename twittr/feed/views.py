@@ -7,13 +7,14 @@ from django.contrib.auth.decorators import login_required
 from .forms import TweetForm
 from .models import Tweet, Follower
 from django.utils import timezone
+from django.http import HttpResponseRedirect
 
 def index(request):
     username = None
     if request.user.is_authenticated:
         username = request.user.username
         user = User.objects.get(username=username)
-    if request.method == 'POST':
+    if request.POST:
         form = TweetForm(request.POST)
         if form.is_valid():
             new_tweet = form.cleaned_data.get('tweet')
@@ -21,12 +22,12 @@ def index(request):
             tweets = Tweet.objects.select_related().filter(tweet_author=user)
             following = Follower.objects.select_related().filter(follower=user)
             followers = Follower.objects.select_related().filter(followed=user)
-            return render(request, 'feed/profile.html', {'user': user, 'tweets': tweets, 'following': following, 'followers': followers})
+            return render(request, 'feed/profile.html', {'profile': user, 'tweets': tweets, 'following': following, 'followers': followers})
     form = TweetForm()
     return render(request, 'feed/feed.html', {'form':form})
 
 def login_req(request):
-    if request.method == 'POST':
+    if request.POST:
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
@@ -43,7 +44,7 @@ def logout_req(request):
     return redirect('/')
 
 def register(request):
-    if request.method =='POST':
+    if request.POST:
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
@@ -59,11 +60,17 @@ def register(request):
     return render(request, 'feed/register.html', {'form': form})
 
 def profile(request, profile):
-    # user = None
-    # if request.user.is_authenticated:
-    #     user = request.user
     profile = User.objects.get(username=profile)
     tweets = Tweet.objects.select_related().filter(tweet_author=profile)
     following = Follower.objects.select_related().filter(follower=profile)
     followers = Follower.objects.select_related().filter(followed=profile)
-    return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers})
+    user_following_profile = followers.filter(follower=request.user)
+
+    if 'unfollow' in request.POST:
+        Follower.objects.select_related().filter(follower=request.user).filter(followed=profile).delete()
+        return HttpResponseRedirect(request.path_info)
+    elif 'follow' in request.POST:
+        Follower.objects.create(follower=request.user, followed=profile)
+        return HttpResponseRedirect(request.path_info)
+
+    return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile})

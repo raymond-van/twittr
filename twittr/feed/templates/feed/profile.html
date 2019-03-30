@@ -7,9 +7,14 @@
 {% endif %}
 
 {% if user.username != profile.username %}
-    <div>
-        <button>Follow</button>
-    </div>
+    <form method="POST">
+        {% csrf_token %}
+        {% if user_following_profile %}
+            <input type='submit' name='unfollow' value='Unfollow' />
+        {% else %}
+            <input type='submit' name='follow' value='Follow' />
+        {% endif %}
+    </form>
 {% endif %}
 
 {% if tweets %}
@@ -26,23 +31,27 @@
 {% endif %}
 
 {% if following %}
-    <ul>
+    <table>
     Following ({{ following.count }}):
     {% for follow in following %}
-        <li>{{ follow.followed }}</li>
+        <tr>
+            <td>{{ follow.followed }}</td>
+        </tr>    
     {% endfor %}
-    </ul>
+    </table>
 {% else %}
     <p>{{ profile.username }} is not following anyone.</p>
 {% endif %}
 
 {% if followers %}
-    <ul>
+    <table>
     Followers ({{ followers.count }}):
     {% for follower in followers %}
-        <li>{{ follower.follower }}</li>
+        <tr>
+            <td>{{ follower.follower }}</td>
+        </tr>
     {% endfor %}
-    </ul>
+    </table>
 {% else %}
     <p>{{ profile.username }} has no followers.</p>
 {% endif %}
