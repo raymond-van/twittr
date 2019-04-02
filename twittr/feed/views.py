@@ -11,20 +11,28 @@ from django.http import HttpResponseRedirect
 
 def index(request):
     username = None
+   
     if request.user.is_authenticated:
         username = request.user.username
         user = User.objects.get(username=username)
+    form = TweetForm()
+    following = Follower.objects.select_related().filter(follower=user)
+    feed_tweets = Tweet.objects.none()
+
     if request.POST:
         form = TweetForm(request.POST)
         if form.is_valid():
             new_tweet = form.cleaned_data.get('tweet')
             Tweet(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now()).save()
-            tweets = Tweet.objects.select_related().filter(tweet_author=user)
-            following = Follower.objects.select_related().filter(follower=user)
-            followers = Follower.objects.select_related().filter(followed=user)
-            return render(request, 'feed/profile.html', {'profile': user, 'tweets': tweets, 'following': following, 'followers': followers})
-    form = TweetForm()
-    return render(request, 'feed/feed.html', {'form':form})
+            return HttpResponseRedirect(request.path_info)
+    
+    for follow in following:
+        tweets = Tweet.objects.select_related().filter(tweet_author=follow.followed)
+        feed_tweets = feed_tweets | tweets
+    feed_tweets = feed_tweets | Tweet.objects.select_related().filter(tweet_author=user)
+    feed_tweets = feed_tweets.order_by('-date_posted')
+
+    return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets})
 
 def login_req(request):
     if request.POST:

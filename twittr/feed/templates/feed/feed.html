@@ -13,4 +13,17 @@
   <p>Log in or Register!</p>
 {% endif %}      
 
+{% if feed_tweets %}
+<table>
+  <h6>Feed:</h6>
+  {% for tweet in feed_tweets %}
+      <tr>
+          <td><a href="/{{ tweet.tweet_author }}">{{ tweet.tweet_author }}</a></td>
+          <td>{{ tweet.tweet_content }}</td>
+          <td>{{ tweet.date_posted }}</td>
+      </tr>
+  {% endfor %}
+  </table>
+{% endif %}
+
 {% endblock %}

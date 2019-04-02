@@ -22,7 +22,9 @@
     Tweets ({{ tweets.count }}):
     {% for tweet in tweets reversed %}
         <tr>
+            <td><a href="/{{ tweet.tweet_author }}">{{ tweet.tweet_author }}</a></td>
             <td>{{ tweet.tweet_content }}</td>
+            <td>{{ tweet.date_posted }}</td>
         </tr>
     {% endfor %}
     </table>
@@ -35,7 +37,7 @@
     Following ({{ following.count }}):
     {% for follow in following %}
         <tr>
-            <td>{{ follow.followed }}</td>
+            <td><a href="/{{ follow.followed }}">{{ follow.followed }}</a></td>
         </tr>    
     {% endfor %}
     </table>
@@ -48,7 +50,7 @@
     Followers ({{ followers.count }}):
     {% for follower in followers %}
         <tr>
-            <td>{{ follower.follower }}</td>
+            <td><a href="/{{ follower.follower }}">{{ follower.follower }}</a></td>
         </tr>
     {% endfor %}
     </table>
