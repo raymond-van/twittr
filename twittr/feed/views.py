@@ -1,7 +1,7 @@
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .forms import TweetForm
@@ -11,10 +11,13 @@ from django.http import HttpResponseRedirect
 
 def index(request):
     username = None
-   
+
     if request.user.is_authenticated:
         username = request.user.username
         user = User.objects.get(username=username)
+    else:
+        return redirect('/login')
+
     form = TweetForm()
     following = Follower.objects.select_related().filter(follower=user)
     feed_tweets = Tweet.objects.none()
@@ -82,3 +85,8 @@ def profile(request, profile):
         return HttpResponseRedirect(request.path_info)
 
     return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile})
+
+def tweet_delete(request, tweet_id):
+    tweet = get_object_or_404(Tweet, pk=tweet_id)
+    tweet.delete()
+    return redirect('/')

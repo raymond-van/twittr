@@ -10,5 +10,6 @@ urlpatterns = [
     path('logout/', views.logout_req, name='logout'),
     path('register/', views.register, name='register'),
     path('<str:profile>/', views.profile, name='profile'),
+    path('delete/<int:tweet_id>/', views.tweet_delete, name='tweet_delete'),
     path('admin', admin.site.urls),
 ]

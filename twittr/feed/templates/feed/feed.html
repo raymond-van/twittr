@@ -15,12 +15,15 @@
 
 {% if feed_tweets %}
 <table>
-  <h6>Feed:</h6>
+  Feed:
   {% for tweet in feed_tweets %}
       <tr>
           <td><a href="/{{ tweet.tweet_author }}">{{ tweet.tweet_author }}</a></td>
           <td>{{ tweet.tweet_content }}</td>
           <td>{{ tweet.date_posted }}</td>
+          {% if tweet.tweet_author == user %}
+          <td><a href="/delete/{{ tweet.id }}">Delete</a></td>
+          {% endif %}
       </tr>
   {% endfor %}
   </table>
