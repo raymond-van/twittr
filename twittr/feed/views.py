@@ -86,7 +86,10 @@ def profile(request, profile):
 
     return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile})
 
-def tweet_delete(request, tweet_id):
+def tweet_delete(request, tweet_id, redirect_url):
     tweet = get_object_or_404(Tweet, pk=tweet_id)
     tweet.delete()
+    if redirect_url != 'feed':
+        profile = '/' + redirect_url
+        return redirect(profile)
     return redirect('/')
