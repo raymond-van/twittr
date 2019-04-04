@@ -4,6 +4,21 @@
 
 {% if user.is_authenticated %}
     <h4>{{ profile.username }}'s Profile</h4>
+    {% if profile.profile.bio %}
+        <p>{{ profile.profile.bio }}</p>
+        {% if user.username == profile.username %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="submit" name='edit-bio' value="Edit Bio" />
+        </form>
+        {% endif %}
+    {% else %}
+    <form method="POST">
+        {% csrf_token %}
+        {{ profile_form }}
+        <input type="submit" name='add-bio' value="Add Bio" />
+    </form>
+    {% endif %}
 {% endif %}
 
 {% if user.username != profile.username %}

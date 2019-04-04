@@ -4,10 +4,11 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .forms import TweetForm
-from .models import Tweet, Follower
+from .forms import TweetForm, UserProfileForm
+from .models import Tweet, Follower, UserProfile
 from django.utils import timezone
 from django.http import HttpResponseRedirect
+from django.forms.models import model_to_dict
 
 def index(request):
     username = None
@@ -76,6 +77,7 @@ def profile(request, profile):
     following = Follower.objects.select_related().filter(follower=profile)
     followers = Follower.objects.select_related().filter(followed=profile)
     user_following_profile = followers.filter(follower=request.user)
+    profile_form = UserProfileForm()
 
     if 'unfollow' in request.POST:
         Follower.objects.select_related().filter(follower=request.user).filter(followed=profile).delete()
@@ -83,8 +85,17 @@ def profile(request, profile):
     elif 'follow' in request.POST:
         Follower.objects.create(follower=request.user, followed=profile)
         return HttpResponseRedirect(request.path_info)
+    elif 'add-bio' in request.POST:
+        bio = request.POST['bio']
+        user_profile, created = UserProfile.objects.update_or_create(user=request.user, defaults={'bio': bio})
+        return HttpResponseRedirect(request.path_info)
+    elif 'edit-bio' in request.POST:
+        bio = request.user.profile.bio
+        profile_form = UserProfileForm(initial={'bio': bio})
+        UserProfile.objects.filter(user=request.user).update(bio='')
+        return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form})
 
-    return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile})
+    return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form})
 
 def tweet_delete(request, tweet_id, redirect_url):
     tweet = get_object_or_404(Tweet, pk=tweet_id)
