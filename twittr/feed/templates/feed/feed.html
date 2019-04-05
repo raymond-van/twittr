@@ -1,8 +1,14 @@
 {% extends 'feed/base.html' %}
+{% load static %}
 
 {% block content %}
 
 {% if user.is_authenticated %}
+  {% if user.profile.picture %}
+    <img src="{{ user.profile.picture.url }}" width=100 />
+  {% else %}
+    <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=100 />
+  {% endif %}
   <h4>{{ user.username }}'s Feed</h4>
   <form method="POST">
     {% csrf_token %}

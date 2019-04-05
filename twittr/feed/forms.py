@@ -9,3 +9,8 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ('bio',)
+
+class ImageUploadForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ('picture',)

@@ -1,8 +1,30 @@
 {% extends 'feed/base.html' %}
+{% load static %}
 
 {% block content %}
 
 {% if user.is_authenticated %}
+    {% if profile.profile.picture %}
+        <img src="{{ profile.profile.picture.url }}" width=100 />
+        {% if user.username == profile.username %}
+        <form method="POST">
+            {% csrf_token %}
+            {{ image_form }}
+            <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
+            <p><input type="submit" name='upload-pic' value="Upload" /></p>
+        </form>
+        {% endif %}
+    {% else %}
+        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=100 />
+        {% if user.username == profile.username %}
+        <form method="POST">
+            {% csrf_token %}
+            {{ image_form }}
+            <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
+            <p><input type="submit" name='upload-pic' value="Upload" /></p>
+        </form>
+        {% endif %}
+    {% endif %}
     <h4>{{ profile.username }}'s Profile</h4>
     {% if profile.profile.bio %}
         <p>{{ profile.profile.bio }}</p>
