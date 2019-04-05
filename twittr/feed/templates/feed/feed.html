@@ -13,7 +13,7 @@
   <form method="POST">
     {% csrf_token %}
     {{ form }}
-    <input type="submit" name="tweet">Tweet</input>
+    <button type="submit">Tweet</button>
   </form>
 {% else %}      
   <p>Log in or Register!</p>
