@@ -5,13 +5,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .forms import TweetForm, UserProfileForm, ImageUploadForm
-from .models import Tweet, Follower, UserProfile
+from .models import Tweet, Follower, UserProfile, Like
 from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.forms.models import model_to_dict
 
 def index(request):
     username = None
+    user = None
 
     if request.user.is_authenticated:
         username = request.user.username
@@ -30,6 +31,14 @@ def index(request):
             Tweet(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now()).save()
             return HttpResponseRedirect(request.path_info)
     
+    if 'like' in request.POST:
+        tweet_content = request.POST['like']
+        tweet = Tweet.objects.select_related().filter(tweet_content=tweet_content)
+        new_like, created = Like.objects.get_or_create(user=user,tweet=tweet[0])
+        if not created:
+            Like.objects.get(user=user,tweet=tweet[0]).delete()
+        return HttpResponseRedirect(request.path_info)
+
     for follow in following:
         tweets = Tweet.objects.select_related().filter(tweet_author=follow.followed)
         feed_tweets = feed_tweets | tweets
@@ -99,6 +108,13 @@ def profile(request, profile):
         picture = request.POST.get('picture')
         UserProfile.objects.filter(user=request.user).update(picture=picture)
         image_form = ImageUploadForm(request.POST, request.FILES)
+        return HttpResponseRedirect(request.path_info)
+    elif 'like' in request.POST:
+        tweet_content = request.POST['like']
+        tweet = Tweet.objects.select_related().filter(tweet_content=tweet_content)
+        new_like, created = Like.objects.get_or_create(user=request.user,tweet=tweet[0])
+        if not created:
+            Like.objects.get(user=request.user,tweet=tweet[0]).delete()
         return HttpResponseRedirect(request.path_info)
 
     return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form})

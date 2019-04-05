@@ -13,7 +13,7 @@
   <form method="POST">
     {% csrf_token %}
     {{ form }}
-    <button type="submit">Tweet</button>
+    <input type="submit" name="tweet">Tweet</input>
   </form>
 {% else %}      
   <p>Log in or Register!</p>
@@ -26,6 +26,13 @@
       <tr>
           <td><a href="/{{ tweet.tweet_author }}">{{ tweet.tweet_author }}</a></td>
           <td>{{ tweet.tweet_content }}</td>
+          <td>
+            <form method="POST">
+              {% csrf_token %}
+              <button type="submit" name="like" value="{{ tweet }}">Likes</button>
+            </form>
+            {{ tweet.like_set.all.count }} 
+          </td>
           <td>{{ tweet.date_posted }}</td>
           {% if tweet.tweet_author == user %}
           <td><a href="/delete/{{ tweet.id }}/feed">Delete</a></td>

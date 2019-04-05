@@ -12,6 +12,12 @@ class Tweet(models.Model):
     def __str__(self):
         return self.tweet_content
 
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user} liked {self.tweet}'
 
 class Follower(models.Model):
     follower = models.ForeignKey(User, on_delete= models.CASCADE, related_name= 'm_follower')
