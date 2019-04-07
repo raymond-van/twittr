@@ -37,8 +37,8 @@ class Reply(models.Model):
     reply_content = models.CharField(max_length=280)
     date_posted = models.DateTimeField()
     
-    def __str__(self):
-        return f'{self.user} reply to {self.op_tweet}'
+    # def __str__(self):
+    #     return f'{self.user} reply to {self.op_tweet}'
 
 class LikeReply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

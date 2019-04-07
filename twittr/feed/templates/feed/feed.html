@@ -114,7 +114,7 @@
         <td>
           <form method="POST">
             {% csrf_token %}
-            <button type="submit" name="like" value="{{ reply }}">
+            <button type="submit" name="like-reply" value="{{ reply.pk }}">
               {{ reply.likereply_set.all.count }} Likes
             </button>
           </form> 

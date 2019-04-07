@@ -43,6 +43,14 @@ def index(request):
         new_reply = request.POST['tweet']
         Reply.objects.create(op_tweet=op_tweet, user=user, date_posted=timezone.now(),reply_content=new_reply)
         return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets, 'op_tweet_id': op_tweet.id})
+    elif 'like-reply' in request.POST:
+        reply_pk = request.POST['like-reply']
+        reply = Reply.objects.get(pk=reply_pk)
+        new_like, created = LikeReply.objects.get_or_create(user=user,reply=reply)
+        op_tweet_id = reply.op_tweet.id
+        if not created:
+            LikeReply.objects.get(user=user,reply=reply).delete()
+        return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets, 'op_tweet_id': op_tweet_id})
     elif request.POST:
         form = TweetForm(request.POST)
         print('tweet')
