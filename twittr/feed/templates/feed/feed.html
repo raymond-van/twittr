@@ -35,7 +35,7 @@
         <td>
           <form method="POST">
             {% csrf_token %}
-            <button type="submit" class="" name="like" value="{{ tweet }}">
+            <button type="submit" class="" name="like" value="{{ tweet.pk }}">
               {{ tweet.like_set.all.count }} Likes
             </button>
           </form> 
@@ -136,7 +136,7 @@
     <form method="POST">
       {% csrf_token %}
       {{ form }}
-      <button type="submit" name="reply" value="{{ tweet }}">
+      <button type="submit" name="reply" value="{{ tweet.pk }}">
         Reply
       </button>
     </form>

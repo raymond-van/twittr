@@ -31,15 +31,15 @@ def index(request):
     feed_tweets = feed_tweets.order_by('-date_posted')
 
     if 'like' in request.POST:
-        tweet_content = request.POST['like']
-        tweet = Tweet.objects.select_related().filter(tweet_content=tweet_content)
-        new_like, created = Like.objects.get_or_create(user=user,tweet=tweet[0])
+        tweet_pk = request.POST['like']
+        tweet = Tweet.objects.get(pk=tweet_pk)
+        new_like, created = Like.objects.get_or_create(user=user,tweet=tweet)
         if not created:
-            Like.objects.get(user=user,tweet=tweet[0]).delete()
+            Like.objects.get(user=user,tweet=tweet).delete()
         return HttpResponseRedirect(request.path_info)
     elif 'reply' in request.POST:
-        op_tweet_content = request.POST.get('reply')
-        op_tweet = Tweet.objects.get(tweet_content=op_tweet_content)
+        op_tweet_pk = request.POST['reply']
+        op_tweet = Tweet.objects.get(pk=op_tweet_pk)
         new_reply = request.POST['tweet']
         Reply.objects.create(op_tweet=op_tweet, user=user, date_posted=timezone.now(),reply_content=new_reply)
         return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets, 'op_tweet_id': op_tweet.id})
