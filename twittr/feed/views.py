@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from .forms import TweetForm, UserProfileForm, ImageUploadForm
-from .models import Tweet, Follower, UserProfile, Like
+from .models import Tweet, Like, Follower, UserProfile, Reply, LikeReply
 from django.utils import timezone
 from django.http import HttpResponseRedirect
 from django.forms.models import model_to_dict
@@ -24,13 +24,12 @@ def index(request):
     following = Follower.objects.select_related().filter(follower=user)
     feed_tweets = Tweet.objects.none()
 
-    if request.POST:
-        form = TweetForm(request.POST)
-        if form.is_valid():
-            new_tweet = form.cleaned_data.get('tweet')
-            Tweet(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now()).save()
-            return HttpResponseRedirect(request.path_info)
-    
+    for follow in following:
+        tweets = Tweet.objects.select_related().filter(tweet_author=follow.followed)
+        feed_tweets = feed_tweets | tweets
+    feed_tweets = feed_tweets | Tweet.objects.select_related().filter(tweet_author=user)
+    feed_tweets = feed_tweets.order_by('-date_posted')
+
     if 'like' in request.POST:
         tweet_content = request.POST['like']
         tweet = Tweet.objects.select_related().filter(tweet_content=tweet_content)
@@ -38,12 +37,19 @@ def index(request):
         if not created:
             Like.objects.get(user=user,tweet=tweet[0]).delete()
         return HttpResponseRedirect(request.path_info)
-
-    for follow in following:
-        tweets = Tweet.objects.select_related().filter(tweet_author=follow.followed)
-        feed_tweets = feed_tweets | tweets
-    feed_tweets = feed_tweets | Tweet.objects.select_related().filter(tweet_author=user)
-    feed_tweets = feed_tweets.order_by('-date_posted')
+    elif 'reply' in request.POST:
+        op_tweet_content = request.POST.get('reply')
+        op_tweet = Tweet.objects.get(tweet_content=op_tweet_content)
+        new_reply = request.POST['tweet']
+        Reply.objects.create(op_tweet=op_tweet, user=user, date_posted=timezone.now(),reply_content=new_reply)
+        return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets, 'op_tweet_id': op_tweet.id})
+    elif request.POST:
+        form = TweetForm(request.POST)
+        print('tweet')
+        if form.is_valid():
+            new_tweet = form.cleaned_data.get('tweet')
+            Tweet(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now()).save()
+            return HttpResponseRedirect(request.path_info)
 
     return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets})
 
