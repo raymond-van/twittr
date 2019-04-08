@@ -13,6 +13,7 @@ from django.forms.models import model_to_dict
 def index(request):
     username = None
     user = None
+    # op_tweet_pk = None
 
     if request.user.is_authenticated:
         username = request.user.username
@@ -20,7 +21,7 @@ def index(request):
     else:
         return redirect('/login')
 
-    form = TweetForm()
+    tweet_form = TweetForm()
     following = Follower.objects.select_related().filter(follower=user)
     feed_tweets = Tweet.objects.none()
 
@@ -40,26 +41,26 @@ def index(request):
     elif 'reply' in request.POST:
         op_tweet_pk = request.POST['reply']
         op_tweet = Tweet.objects.get(pk=op_tweet_pk)
-        new_reply = request.POST['tweet']
+        new_reply = request.POST['tweet'] # key is tweet bc using TweetForm
         Reply.objects.create(op_tweet=op_tweet, user=user, date_posted=timezone.now(),reply_content=new_reply)
-        return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets, 'op_tweet_id': op_tweet.id})
+        return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet.pk})
     elif 'like-reply' in request.POST:
         reply_pk = request.POST['like-reply']
         reply = Reply.objects.get(pk=reply_pk)
         new_like, created = LikeReply.objects.get_or_create(user=user,reply=reply)
-        op_tweet_id = reply.op_tweet.id
+        op_tweet_pk = reply.op_tweet.id
         if not created:
             LikeReply.objects.get(user=user,reply=reply).delete()
-        return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets, 'op_tweet_id': op_tweet_id})
+        return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet_pk})
     elif request.POST:
-        form = TweetForm(request.POST)
+        tweet_form = TweetForm(request.POST)
         print('tweet')
-        if form.is_valid():
-            new_tweet = form.cleaned_data.get('tweet')
+        if tweet_form.is_valid():
+            new_tweet = tweet_form.cleaned_data.get('tweet')
             Tweet(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now()).save()
             return HttpResponseRedirect(request.path_info)
 
-    return render(request, 'feed/feed.html', {'form':form, 'feed_tweets': feed_tweets})
+    return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets})
 
 def login_req(request):
     if request.POST:
@@ -102,6 +103,7 @@ def profile(request, profile):
     user_following_profile = followers.filter(follower=request.user)
     profile_form = UserProfileForm()
     image_form = ImageUploadForm()
+    tweet_form = TweetForm()
 
     if 'unfollow' in request.POST:
         Follower.objects.select_related().filter(follower=request.user).filter(followed=profile).delete()
@@ -117,25 +119,50 @@ def profile(request, profile):
         bio = request.user.profile.bio
         profile_form = UserProfileForm(initial={'bio': bio})
         UserProfile.objects.filter(user=request.user).update(bio='')
-        return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form})
+        return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'tweet_form': tweet_form})
     elif 'upload-pic' in request.POST:
         picture = request.POST.get('picture')
         UserProfile.objects.filter(user=request.user).update(picture=picture)
         image_form = ImageUploadForm(request.POST, request.FILES)
         return HttpResponseRedirect(request.path_info)
     elif 'like' in request.POST:
-        tweet_content = request.POST['like']
-        tweet = Tweet.objects.select_related().filter(tweet_content=tweet_content)
-        new_like, created = Like.objects.get_or_create(user=request.user,tweet=tweet[0])
+        for key,value in request.POST.items():
+            print(key,value)
+        tweet_pk = request.POST['like']
+        tweet = Tweet.objects.get(pk=tweet_pk)
+        new_like, created = Like.objects.get_or_create(user=request.user,tweet=tweet)
         if not created:
-            Like.objects.get(user=request.user,tweet=tweet[0]).delete()
+            Like.objects.get(user=request.user,tweet=tweet).delete()
         return HttpResponseRedirect(request.path_info)
+    elif 'like-reply' in request.POST:
+        reply_pk = request.POST['like-reply']
+        reply = Reply.objects.get(pk=reply_pk)
+        new_like, created = LikeReply.objects.get_or_create(user=request.user,reply=reply)
+        op_tweet_pk = reply.op_tweet.pk
+        if not created:
+            LikeReply.objects.get(user=request.user,reply=reply).delete()
+        return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'op_tweet_pk': op_tweet_pk, 'tweet_form': tweet_form})
+    elif 'reply' in request.POST:
+        op_tweet_pk = request.POST['reply']
+        op_tweet = Tweet.objects.get(pk=op_tweet_pk)
+        new_reply = request.POST['tweet'] # key is tweet bc using TweetForm
+        Reply.objects.create(op_tweet=op_tweet, user=request.user, date_posted=timezone.now(),reply_content=new_reply)
+        return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'op_tweet_pk': op_tweet_pk, 'tweet_form': tweet_form})
 
-    return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form})
+    return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'tweet_form': tweet_form})
 
-def tweet_delete(request, tweet_id, redirect_url):
-    tweet = get_object_or_404(Tweet, pk=tweet_id)
+def tweet_delete(request, tweet_pk, redirect_url):
+    tweet = get_object_or_404(Tweet, pk=tweet_pk)
     tweet.delete()
+    if redirect_url != 'feed':
+        profile = '/' + redirect_url
+        return redirect(profile)
+    return redirect('/')
+
+def reply_delete(request, reply_pk, tweet_pk, redirect_url):
+    reply = get_object_or_404(Reply, pk=reply_pk)
+    reply.delete()
+    op_tweet_pk = tweet_pk
     if redirect_url != 'feed':
         profile = '/' + redirect_url
         return redirect(profile)

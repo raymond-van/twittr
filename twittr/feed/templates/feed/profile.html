@@ -59,18 +59,36 @@
     Tweets ({{ tweets.count }}):
     {% for tweet in tweets reversed %}
         <tr>
-            <td><a href="/{{ tweet.tweet_author }}">{{ tweet.tweet_author }}</a></td>
-            <td>{{ tweet.tweet_content }}</td>
+            <td>
+                <a href="/{{ tweet.tweet_author }}">
+                    {{ tweet.tweet_author }}
+                </a>
+            </td>
+            <td>
+                {{ tweet.tweet_content }}
+            </td>
             <td>
                 <form method="POST">
                     {% csrf_token %}
-                    <button type="submit" name="like" value="{{ tweet }}">Likes</button>
+                    <button type="submit" name="like" value="{{ tweet.pk }}">
+                        {{ tweet.like_set.all.count }} Likes
+                    </button>
                 </form>
-                {{ tweet.like_set.all.count }} 
             </td>
-            <td>{{ tweet.date_posted }}</td>
+            <td>
+                <button data-target="tweet{{ tweet.pk }}" class="modal-trigger">
+                    {{ tweet.reply_set.all.count }} Replies
+                </button>
+            </td>
+            <td>
+                {{ tweet.date_posted }}
+            </td>
             {% if tweet.tweet_author == user %}
-            <td><a href="/delete/{{ tweet.id }}/{{ user.username }}">Delete</a></td>
+            <td>
+                <a href="/delete/{{ tweet.pk }}/{{ user.username }}">
+                    Delete
+                </a>
+            </td>
             {% endif %}
         </tr>
     {% endfor %}
@@ -104,5 +122,98 @@
 {% else %}
     <p>{{ profile.username }} has no followers.</p>
 {% endif %}
+
+<!-- Modal Feed -->
+{% for tweet in tweets reversed %}
+    <div class="modal" id="tweet{{ tweet.pk }}">
+        <!-- OP Tweet -->
+        <table class="highlight">
+            <tr>
+                <td>
+                    <a href="/{{ tweet.tweet_author }}">
+                        {{ tweet.tweet_author }}
+                    </a>
+                </td>
+                <td>
+                    {{ tweet.tweet_content }}
+                </td>
+                <td>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="like" value="{{ tweet.pk }}">
+                        {{ tweet.like_set.all.count }} Likes
+                        </button>
+                    </form> 
+                </td>
+                <td>
+                    <button data-target="tweet{{ tweet.pk }}" class="modal-trigger">
+                        {{ tweet.reply_set.all.count }} Replies
+                    </button>
+                </td>
+                <td>
+                    {{ tweet.date_posted }}
+                </td>
+                {% if tweet.tweet_author == user %}
+                <td>
+                    <a href="/delete/{{ tweet.pk }}/{{ user.username }}">
+                        Delete
+                    </a>
+                </td>
+                {% endif %}
+            </tr>
+        </table>
+        <!-- Replies -->
+        <table class="highlight">
+            {% if tweet.reply_set.all %}
+            {% for reply in tweet.reply_set.all %}
+            <tr>
+                <td>
+                    <a href="/{{ reply.user }}">
+                        {{ reply.user }}
+                    </a>
+                </td>
+                <td>
+                    {{ reply.reply_content }}
+                </td>
+                <td>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="like-reply" value="{{ reply.pk }}">
+                        {{ reply.likereply_set.all.count }} Likes
+                        </button>
+                    </form> 
+                </td>
+                <td>
+                    {{ reply.date_posted }}
+                </td>
+                <td>
+                    {% if reply.user == user %}
+                    <a href="/delete_reply/{{ reply.pk }}/{{ tweet.pk }}/{{ user.username}}">
+                        Delete
+                    </a>
+                    {% endif %}
+                </td>
+                </tr>
+            {% endfor %}
+            {% endif %}
+        </table>
+        <form method="POST">
+            {% csrf_token %}
+            {{ tweet_form }}
+            <button type="submit" name="reply" value="{{ tweet.pk }}">
+                Reply
+            </button>
+        </form>
+    </div>
+{% endfor %}
+
+<script>
+    $(document).ready(function(){
+        $('.modal').modal();
+        {% if op_tweet_pk %}
+        $('#tweet{{ op_tweet_pk}}').modal('open');
+        {% endif %}
+    });
+</script>
 
 {% endblock %}

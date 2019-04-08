@@ -10,6 +10,7 @@ urlpatterns = [
     path('logout/', views.logout_req, name='logout'),
     path('register/', views.register, name='register'),
     path('<str:profile>/', views.profile, name='profile'),
-    path('delete/<int:tweet_id>/<str:redirect_url>', views.tweet_delete, name='tweet_delete'),
+    path('delete/<int:tweet_pk>/<str:redirect_url>', views.tweet_delete, name='tweet_delete'),
+    path('delete_reply/<int:reply_pk>/<int:tweet_pk>/<str:redirect_url>', views.reply_delete, name='reply_delete'),
     path('admin', admin.site.urls),
 ]
