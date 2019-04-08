@@ -14,7 +14,11 @@
           <ul id="nav-mobile" class="right hide-on-med-and-down">
             {% if user.is_authenticated %}
               <li><a href="/{{ user.username }}">{{ user.username }}</a></li>
-              <li>Tweet</li>
+              <li>
+                <button data-target="tweet-nav" class="modal-trigger">
+                  Tweet
+                </button>
+              </li>
               <li><a href='/logout'>Log out</a></li>
             {% else %}      
               <li><a href='/login'>Log in</a></li>
@@ -23,6 +27,16 @@
           </ul>
         </div>
       </nav>  
+    
+    {% if tweet_form %}
+    <div class="modal" id="tweet-nav">
+      <form method="POST">
+        {% csrf_token %}
+        {{ tweet_form }}
+        <button type="submit">Tweet</button>
+      </form>
+    </div>
+    {% endif %}
 
     {% block content %}
     {% endblock %}

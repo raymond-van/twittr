@@ -13,7 +13,6 @@ from django.forms.models import model_to_dict
 def index(request):
     username = None
     user = None
-    # op_tweet_pk = None
 
     if request.user.is_authenticated:
         username = request.user.username
@@ -54,10 +53,9 @@ def index(request):
         return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet_pk})
     elif request.POST:
         tweet_form = TweetForm(request.POST)
-        print('tweet')
         if tweet_form.is_valid():
             new_tweet = tweet_form.cleaned_data.get('tweet')
-            Tweet(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now()).save()
+            Tweet.objects.create(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now())
             return HttpResponseRedirect(request.path_info)
 
     return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets})
@@ -148,6 +146,12 @@ def profile(request, profile):
         new_reply = request.POST['tweet'] # key is tweet bc using TweetForm
         Reply.objects.create(op_tweet=op_tweet, user=request.user, date_posted=timezone.now(),reply_content=new_reply)
         return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'op_tweet_pk': op_tweet_pk, 'tweet_form': tweet_form})
+    elif request.POST:
+        tweet_form = TweetForm(request.POST)
+        if tweet_form.is_valid():
+            new_tweet = tweet_form.cleaned_data.get('tweet')
+            Tweet.objects.create(tweet_content=new_tweet, tweet_author=request.user,date_posted=timezone.now())
+            return HttpResponseRedirect(request.path_info)
 
     return render(request, 'feed/profile.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'tweet_form': tweet_form})
 
