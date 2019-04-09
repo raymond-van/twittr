@@ -25,6 +25,11 @@
   {% for tweet in feed_tweets %}
       <tr>
         <td>
+          {% if tweet.tweet_author.profile.picture %}
+          <img src="{{ tweet.tweet_author.profile.picture.url }}" width=30 />
+          {% else %}
+          <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 />
+          {% endif %}
           <a href="/{{ tweet.tweet_author }}">
             {{ tweet.tweet_author }}
           </a>
@@ -66,6 +71,11 @@
     <table class="highlight">
       <tr>
         <td>
+          {% if tweet.tweet_author.profile.picture %}
+          <img src="{{ tweet.tweet_author.profile.picture.url }}" width=30 />
+          {% else %}
+          <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 />
+          {% endif %}
           <a href="/{{ tweet.tweet_author }}">
             {{ tweet.tweet_author }}
           </a>
@@ -104,6 +114,11 @@
       {% for reply in tweet.reply_set.all %}
       <tr>
         <td>
+          {% if reply.user.profile.picture %}
+          <img src="{{ reply.user.profile.picture.url }}" width=30 />
+          {% else %}
+          <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 />
+          {% endif %}
           <a href="/{{ reply.user }}">
             {{ reply.user }}
           </a>

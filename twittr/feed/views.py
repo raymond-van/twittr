@@ -51,11 +51,6 @@ def index(request):
         if not created:
             LikeReply.objects.get(user=user,reply=reply).delete()
         return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet_pk})
-    # elif 'search' in request.GET:
-    #     for key in request.POST:
-    #         value = request.POST[key]
-    #         print(key,value)
-        # print(request.GET.get('search')
     elif request.POST:
         tweet_form = TweetForm(request.POST)
         if tweet_form.is_valid():
