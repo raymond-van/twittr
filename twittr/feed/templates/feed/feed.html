@@ -9,7 +9,22 @@
   {% else %}
     <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=100 />
   {% endif %}
-  <h4>{{ user.username }}'s Feed</h4>
+  <h4>
+    <a href='/{{ user.username }}'>
+      {{ user.username }}'s Feed
+    </a>
+  </h4>
+  <p>
+    <a href='/{{ user.username }}'>
+      Tweets: {{ user.tweet_set.all.count }} 
+    </a> |
+    <a href='/{{ user.username }}/following'>
+     Following: {{ following_count}} 
+    </a> |
+    <a href='/{{ user.username }}/followers'>
+     Followers: {{ follower_count }} 
+    </a>
+  </p>
   <form method="POST">
     {% csrf_token %}
     {{ tweet_form }}

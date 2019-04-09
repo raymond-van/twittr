@@ -30,6 +30,14 @@ def index(request):
     feed_tweets = feed_tweets | Tweet.objects.select_related().filter(tweet_author=user)
     feed_tweets = feed_tweets.order_by('-date_posted')
 
+    search = request.GET.get('search')
+    if search:
+        url = '/search/' + search
+        return redirect(url)
+
+    follower_count = Follower.objects.filter(followed=user).count()
+    following_count = Follower.objects.filter(follower=user).count()
+
     if 'like' in request.POST:
         tweet_pk = request.POST['like']
         tweet = Tweet.objects.get(pk=tweet_pk)
@@ -58,12 +66,20 @@ def index(request):
             Tweet.objects.create(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now())
             return HttpResponseRedirect(request.path_info)
     
-    search = request.GET.get('search')
-    if search:
-        url = '/search/' + search
-        return redirect(url)
+    return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'following_count': following_count, 'follower_count': follower_count})
 
-    return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets})
+def following(request, profile):
+    profile = User.objects.get(username=profile)
+    following_list = Follower.objects.select_related().filter(follower=profile)
+
+    return render(request, 'feed/following.html', {'following_list': following_list})
+
+def followers(request, profile):
+    profile = User.objects.get(username=profile)
+    follower_list = Follower.objects.select_related().filter(followed=profile)
+
+    return render(request, 'feed/followers.html', {'follower_list': follower_list})
+
 
 def search(request, search_term):
     user_results = User.objects.filter(username__contains=search_term)

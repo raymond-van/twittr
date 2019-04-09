@@ -13,5 +13,7 @@ urlpatterns = [
     path('delete/<int:tweet_pk>/<str:redirect_url>/', views.tweet_delete, name='tweet_delete'),
     path('delete_reply/<int:reply_pk>/<int:tweet_pk>/<str:redirect_url>/', views.reply_delete, name='reply_delete'),
     path('search/<str:search_term>/', views.search, name='search'),
+    path('<str:profile>/following/', views.following, name='following'),
+    path('<str:profile>/followers/', views.followers, name='followers'),
     path('admin', admin.site.urls),
 ]
