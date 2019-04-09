@@ -1,6 +1,7 @@
 {% load static %}
 <head>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link rel="stylesheet" type="text/css" href="{% static 'feed/style.css' %}">
@@ -9,16 +10,29 @@
 <body>
 
     <nav>
-        <div class="nav-wrapper blue">
-          <a href="/" class="brand-logo">Twittr</a>
+        <div class="nav-wrapper light-blue accent-2">
+          <a href="/" class="brand-logo left">Home</a>
+          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=122/></a>
           <ul id="nav-mobile" class="right hide-on-med-and-down">
             {% if user.is_authenticated %}
-              <li><a href="/{{ user.username }}">{{ user.username }}</a></li>
+              <li>
+                <form method="GET">
+                  {% csrf_token %}
+                  <div class="input-field">
+                    <input id="search" name='search' type="search" placeholder="Search Twittr" required>
+                    <!-- <button id='search'>Search</button> -->
+                    <label class="label-icon" for="search">
+                      <i class="material-icons">search</i>
+                    </label>
+                  </div>
+                </form>
+              </li>
               <li>
                 <button data-target="tweet-nav" class="modal-trigger">
                   Tweet
                 </button>
               </li>
+              <li><a href="/{{ user.username }}">{{ user.username }}</a></li>
               <li><a href='/logout'>Log out</a></li>
             {% else %}      
               <li><a href='/login'>Log in</a></li>

@@ -51,14 +51,35 @@ def index(request):
         if not created:
             LikeReply.objects.get(user=user,reply=reply).delete()
         return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet_pk})
+    # elif 'search' in request.GET:
+    #     for key in request.POST:
+    #         value = request.POST[key]
+    #         print(key,value)
+        # print(request.GET.get('search')
     elif request.POST:
         tweet_form = TweetForm(request.POST)
         if tweet_form.is_valid():
             new_tweet = tweet_form.cleaned_data.get('tweet')
             Tweet.objects.create(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now())
             return HttpResponseRedirect(request.path_info)
+    
+    search = request.GET.get('search')
+    if search:
+        url = '/search/' + search
+        return redirect(url)
 
     return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets})
+
+def search(request, search_term):
+    user_results = User.objects.filter(username__contains=search_term)
+    tweet_results = Tweet.objects.filter(tweet_content__contains=search_term)
+
+    search = request.GET.get('search')
+    if search:
+        url = '/search/' + search
+        return redirect(url)
+
+    return render(request, 'feed/search.html', {'search_term': search_term, 'user_results': user_results, 'tweet_results': tweet_results})
 
 def login_req(request):
     if request.POST:

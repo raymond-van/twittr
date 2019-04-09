@@ -1,0 +1,27 @@
+{% extends 'feed/base.html' %}
+{% load static %}
+
+{% block content %}
+<h3>People:</h3>
+{% if user_results %}
+<ul>
+{% for user in user_results %}
+<li>{{ user.username }}</li>
+{% endfor %}
+</ul>
+{% else %}
+No tweets with {{ search_term }}
+{% endif %}
+
+<h3>Tweets:</h3>
+{% if tweet_results %}
+<ul>
+{% for tweet in tweet_results %}
+<li>{{ tweet.tweet_content }}</li>
+{% endfor %}
+</ul>
+{% else %}
+No tweets with {{ search_term }}
+{% endif %}
+
+{% endblock %}
