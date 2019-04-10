@@ -1,63 +1,18 @@
-{% extends 'feed/base.html' %}
+{% extends 'feed/profile_base.html' %}
 {% load static %}
 
 {% block content %}
 
-{% if user.is_authenticated %}
-    {% if profile.profile.picture %}
-        <img src="{{ profile.profile.picture.url }}" width=100 />
-        {% if user.username == profile.username %}
-        <form method="POST">
-            {% csrf_token %}
-            {{ image_form }}
-            <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
-            <p><input type="submit" name='upload-pic' value="Upload" /></p>
-        </form>
-        {% endif %}
-    {% else %}
-        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=100 />
-        {% if user.username == profile.username %}
-        <form method="POST">
-            {% csrf_token %}
-            {{ image_form }}
-            <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
-            <p><input type="submit" name='upload-pic' value="Upload" /></p>
-        </form>
-        {% endif %}
-    {% endif %}
-    <h4>{{ profile.username }}'s Profile</h4>
-    {% if profile.profile.bio %}
-        <p>{{ profile.profile.bio }}</p>
-        {% if user.username == profile.username %}
-        <form method="POST">
-            {% csrf_token %}
-            <input type="submit" name='edit-bio' value="Edit Bio" />
-        </form>
-        {% endif %}
-    {% else %}
-    <form method="POST">
-        {% csrf_token %}
-        {{ profile_form }}
-        <input type="submit" name='add-bio' value="Add Bio" />
-    </form>
-    {% endif %}
-{% endif %}
-
-{% if user.username != profile.username %}
-    <form method="POST">
-        {% csrf_token %}
-        {% if user_following_profile %}
-            <input type='submit' name='unfollow' value='Unfollow' />
-        {% else %}
-            <input type='submit' name='follow' value='Follow' />
-        {% endif %}
-    </form>
-{% endif %}
-
 {% if tweets %}
     <table class="highlight">
-    <a href='/{{ profile.username }}'>
-        Tweets ({{ tweets.count }}):
+    <a href='/{{ profile.username }}' style='font-weight:bold;font-size:15px;'>
+        Tweets ({{ tweets.count }})
+    </a> |
+    <a href='/{{ profile.username }}/following'>
+        Following ({{ following.count }})
+    </a> |
+    <a href='/{{ profile.username }}/followers'>
+        Followers ({{ followers.count }})
     </a>
     {% for tweet in tweets reversed %}
         <tr>
@@ -101,37 +56,16 @@
     {% endfor %}
     </table>
 {% else %}
-    <p>{{ profile.username }} has not tweeted yet.</p>
-{% endif %}
-
-{% if following %}
-    <table>
+    <a href='/{{ profile.username }}' style='font-weight:bold;font-size:15px;'>
+        Tweets ({{ tweets.count }})
+    </a> |
     <a href='/{{ profile.username }}/following'>
-        Following ({{ following.count }}):
-    </a>
-    {% for follow in following %}
-        <tr>
-            <td><a href="/{{ follow.followed }}">{{ follow.followed }}</a></td>
-        </tr>    
-    {% endfor %}
-    </table>
-{% else %}
-    <p>{{ profile.username }} is not following anyone.</p>
-{% endif %}
-
-{% if followers %}
-    <table>
+        Following ({{ following.count }})
+    </a> |
     <a href='/{{ profile.username }}/followers'>
-        Followers ({{ followers.count }}):
+        Followers ({{ followers.count }})
     </a>
-    {% for follower in followers %}
-        <tr>
-            <td><a href="/{{ follower.follower }}">{{ follower.follower }}</a></td>
-        </tr>
-    {% endfor %}
-    </table>
-{% else %}
-    <p>{{ profile.username }} has no followers.</p>
+    <p>{{ profile.username }} has not tweeted yet.</p>
 {% endif %}
 
 <!-- Modal Feed -->
@@ -227,14 +161,5 @@
         </form>
     </div>
 {% endfor %}
-
-<script>
-    $(document).ready(function(){
-        $('.modal').modal();
-        {% if op_tweet_pk %}
-        $('#tweet{{ op_tweet_pk}}').modal('open');
-        {% endif %}
-    });
-</script>
 
 {% endblock %}

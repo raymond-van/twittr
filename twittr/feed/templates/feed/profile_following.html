@@ -1,0 +1,35 @@
+{% extends 'feed/profile_base.html' %}
+
+{% block content %}
+
+{% if following %}
+    <table>
+        <a href='/{{ profile.username }}'>
+            Tweets ({{ tweets.count }})
+        </a> |
+        <a href='/{{ profile.username }}/following' style='font-weight:bold;font-size:15px;'>
+            Following ({{ following.count }})
+        </a> |
+        <a href='/{{ profile.username }}/followers'>
+            Followers ({{ followers.count }})
+        </a>
+    {% for follow in following %}
+        <tr>
+            <td><a href="/{{ follow.followed }}">{{ follow.followed }}</a></td>
+        </tr>    
+    {% endfor %}
+    </table>
+{% else %}
+    <a href='/{{ profile.username }}'>
+        Tweets ({{ tweets.count }})
+    </a> |
+    <a href='/{{ profile.username }}/following' style='font-weight:bold;font-size:15px;'>
+        Following ({{ following.count }})
+    </a> |
+    <a href='/{{ profile.username }}/followers'>
+        Followers ({{ followers.count }})
+    </a>
+    <p>{{ profile.username }} is not following anyone.</p>
+{% endif %}
+
+{% endblock %}

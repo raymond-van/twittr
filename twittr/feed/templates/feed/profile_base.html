@@ -1,0 +1,123 @@
+{% load static %}
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'feed/style.css' %}">
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-wrapper light-blue accent-2">
+          <a href="/" class="brand-logo left">Home</a>
+          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=122/></a>
+          <ul id="nav-mobile" class="right hide-on-med-and-down">
+            {% if user.is_authenticated %}
+              <li>
+                <form method="GET">
+                  {% csrf_token %}
+                  <div class="input-field">
+                    <input id="search" name='search' type="search" placeholder="Search Twittr" required>
+                    <button id='search'>Search</button>
+                    <label class="label-icon" for="search">
+                      <i class="material-icons">search</i>
+                    </label>
+                  </div>
+                </form>
+              </li>
+              <li>
+                <button data-target="tweet-nav" class="modal-trigger">
+                  Tweet
+                </button>
+              </li>
+              <li><a href="/{{ user.username }}">{{ user.username }}</a></li>
+              <li><a href='/logout'>Log out</a></li>
+            {% else %}      
+              <li><a href='/login'>Log in</a></li>
+              <li><a href='/register'>Register</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </nav>  
+    
+      {% if user.is_authenticated %}
+      {% if profile.profile.picture %}
+          <img src="{{ profile.profile.picture.url }}" width=100 />
+          {% if user.username == profile.username %}
+          <form method="POST">
+              {% csrf_token %}
+              {{ image_form }}
+              <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
+              <p><input type="submit" name='upload-pic' value="Upload" /></p>
+          </form>
+          {% endif %}
+      {% else %}
+          <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=100 />
+          {% if user.username == profile.username %}
+          <form method="POST">
+              {% csrf_token %}
+              {{ image_form }}
+              <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
+              <p><input type="submit" name='upload-pic' value="Upload" /></p>
+          </form>
+          {% endif %}
+      {% endif %}
+      <h4>{{ profile.username }}'s Profile</h4>
+
+      {% if profile.profile.bio %}
+          <p>{{ profile.profile.bio }}</p>
+          {% if user.username == profile.username %}
+          <form method="POST">
+              {% csrf_token %}
+              <input type="submit" name='edit-bio' value="Edit Bio" />
+          </form>
+          {% endif %}
+      {% elif user.username != profile.username%}
+          <p>{{profile.username}} has not entered a bio.</p>
+      {% else %}
+      <form method="POST">
+          {% csrf_token %}
+          {{ profile_form }}
+          <input type="submit" name='add-bio' value="Add Bio" />
+      </form>
+      {% endif %}
+  {% endif %}
+  
+  {% if user.username != profile.username %}
+      <form method="POST">
+          {% csrf_token %}
+          {% if user_following_profile %}
+              <input type='submit' name='unfollow' value='Unfollow' />
+          {% else %}
+              <input type='submit' name='follow' value='Follow' />
+          {% endif %}
+      </form>
+  {% endif %}
+  
+
+    {% if tweet_form %}
+    <div class="modal" id="tweet-nav">
+      <form method="POST">
+        {% csrf_token %}
+        {{ tweet_form }}
+        <button type="submit">Tweet</button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% block content %}
+    
+    {% endblock %}
+    
+  <script>
+      $(document).ready(function(){
+          $('.modal').modal();
+          {% if op_tweet_pk %}
+          $('#tweet{{ op_tweet_pk}}').modal('open');
+          {% endif %}
+      });
+  </script>
+</body>
+
