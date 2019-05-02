@@ -1,1 +1,1 @@
-web: gunicorn twittr/twittr.wsgi
+web: gunicorn twittr.wsgi
