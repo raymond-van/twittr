@@ -1,2 +1,2 @@
 # twittr
-Twitter clone built with django and react.
+Twitter clone built with django.
