@@ -2,26 +2,318 @@
 {% load static %}
 
 {% block content %}
-<h3>People:</h3>
-{% if user_results %}
-<ul>
-{% for user in user_results %}
-<li><a href='/{{ user.username }}'>{{ user.username }}</a></li>
-{% endfor %}
-</ul>
-{% else %}
-No tweets with {{ search_term }}
-{% endif %}
+<div class='search-header'>
+    <p> 
+        {{ search_term }}
+    </p>
+</div>
+<div class='search-people-container-out'>
+    <div class='search-people-container'>
+        {% if user_results %}
+        <div class='search-people-heading'>
+            <p>
+                People
+            </p>
+        </div>
+            <div class='search-people-grid'>
+                {% for user in user_results %}
+                <table class=profile-following>
+                    <tr>
+                        <td>
+                            <div class='feed-head-container'>
+                                <div class='feed-blue-bar-head'>
+                                </div>
+                                <div class='feed-user-head'>
+                                    {% if user.profile.picture %}
+                                    <a href='/{{ user.username }}'>
+                                        <img src="{{ user.profile.picture.url }}" width=75 height=75/></a>
+                                    {% else %}
+                                    <a href='/{{ user.username }}'>
+                                        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=75 height=75/></a>
+                                    {% endif %}
+                                    <h4>
+                                        <a href='/{{ user.username }}'>
+                                        {{ user.username }}
+                                        </a>
+                                    </h4>
+                                    <div class='feed-user-stats'>
+                                        <p>
+                                            {{ user.profile.bio }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+<div class='table-container-out'>
+    {% if tweet_results %}
+    <div class='table-container'>
+        <table class='profile-tweets'>
+        {% for tweet in tweet_results reversed %}
+            <tbody>
+                <tr class='profile-tweet-row1 modal-trigger' data-target='tweet{{ tweet.pk }}'>
+                    <td>
+                        <div class='profile-tweet-pic'>
+                            {% if tweet.tweet_author.profile.picture %}
+                            <a href='/{{ tweet.tweet_author }}'>
+                                <img src="{{ tweet.tweet_author.profile.picture.url }}" width=50 height=50/>
+                            </a>
+                            {% else %}
+                            <a href='/{{ tweet.tweet_author }}'>
+                                <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=50 height=50/>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td colspan='3'>
+                        <div class='profile-tweet-author-date'>
+                            <a href="/{{ tweet.tweet_author }}">
+                                <span class='profile-tweet-author'>{{tweet.tweet_author}}</span></a>
+                            <span style='color:#657786;'>&middot;</span>
+                            <span class='profile-tweet-date'>{{ tweet.date_posted }}</span>
+                        </div>
+                    </td>
+                </tr>
+                <tr class='profile-tweet-row2 modal-trigger' data-target='tweet{{ tweet.pk }}'>
+                    <td>
+                    </td>
+                    <td colspan='3'>
+                        <div class='profile-tweet-content'>
+                            {{ tweet.tweet_content }}
+                        </div>
+                    </td>
+                </tr>
+                <tr class='profile-tweet-row3'>
+                    <td>
+                    </td>
+                    <td>
+                        <div class='profile-tweet-reply'>
+                            <button data-target="tweet{{ tweet.pk }}" class="modal-trigger profile-tweet-reply-btn">
+                            <i class='material-icons'>chat_bubble_outline</i>&nbsp;&nbsp;
+                                {{ tweet.reply_set.all.count }}
+                            </button>
+                        </div>
+                    </td>
+                    <td>
+                        <div class='profile-tweet-like'>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <button class='profile-tweet-like-btn' type="submit" name="like" value="{{ tweet.pk }}">
+                                    <i class='material-icons'>favorite_border</i>&nbsp;&nbsp;
+                                    {{ tweet.like_set.all.count }}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                    {% if tweet.tweet_author == user %}
+                    <td>
+                        <div class='profile-tweet-delete'>
+                            <a href="/delete/{{ tweet.pk }}/{{ user.username }}">
+                                Delete
+                            </a>
+                        </div>
+                    </td>
+                    {% else %}
+                    <td>
+                    </td>
+                    {% endif %}
+                </tr>
+            </tbody>
+        {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+</div>
 
-<h3>Tweets:</h3>
-{% if tweet_results %}
-<ul>
-{% for tweet in tweet_results %}
-<li>{{ tweet.tweet_content }}</li>
+<!-- MODAL FEED -->
+{% for tweet in tweet_results reversed %}
+    <div class="modal" id="tweet{{ tweet.pk }}">
+        <table class="modal-tweet-table">
+            <tr class='timeline-modal-tweet-row1'>
+                <td class='timeline-modal-tweet-row1-td1' colspan='3'>
+                <div class='timeline-modal-tweet-pic'>
+                    {% if tweet.tweet_author.profile.picture %}
+                    <a href='/{{ tweet.tweet_author }}'>
+                    <img src="{{ tweet.tweet_author.profile.picture.url }}" width=50 height=50/>
+                    </a>
+                    {% else %}
+                    <a href='/{{ tweet.tweet_author }}'>
+                    <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=50 height=50/>
+                    </a>
+                    {% endif %}
+                </div>
+                <div class='timeline-modal-tweet-author-date'>
+                    <a href="/{{ tweet.tweet_author }}">
+                    <span class='timeline-tweet-author'>
+                        {{tweet.tweet_author}}</span></a>
+                </div>
+                </td>
+            </tr>
+            <tr class='timeline-modal-tweet-row2'>
+                <td colspan='3'>
+                <div class='timeline-modal-tweet-content'>
+                    {{ tweet.tweet_content }}
+                </div>
+                </td>
+            </tr>
+            <tr class='timeline-modal-tweet-row3'>
+                <td colspan='3'>
+                <div>
+                    <span class='timeline-modal-tweet-date'>
+                    {{ tweet.date_posted }}
+                    </span>
+                </div>  
+                </td>
+            </tr>
+            {% if tweet.reply_set.all.count > 0 or tweet.like_set.all.count > 0 %}
+            <tr class='timeline-modal-tweet-row4'>
+                <td class='timeline-modal-tweet-likeborder'>
+                <div class='timeline-modal-tweet-stats'>
+                    {% if tweet.reply_set.all.count == 0 %}
+                    {% elif tweet.reply_set.all.count == 1 %}
+                    <span class='tweet-count'>{{ tweet.reply_set.all.count }}</span> Reply
+                    {% else %}
+                    <span class='tweet-count'>{{ tweet.reply_set.all.count }}</span> Replies
+                    {% endif %}
+                    &nbsp;
+                    {% if tweet.like_set.all.count == 0 %}
+                    {% elif tweet.like_set.all.count == 1 %}
+                    <span class='tweet-count'>{{ tweet.like_set.all.count }}</span> Like
+                    {% else %}
+                    <span class='tweet-count'>{{ tweet.like_set.all.count }}</span> Likes
+                    {% endif %}
+                </div>
+                </td>
+                <td colspan='2'>
+                <div class='timeline-modal-like-pics'>
+                    {% for like in tweet.like_set.all %}
+                    {% if like.user.profile.picture %}
+                    <a href='/{{ like.user }}'>
+                        <img src="{{ like.user.profile.picture.url }}" width=25 height=25/>
+                    </a>  
+                    {% else %}
+                    <a href='/{{ like.user }}'>
+                        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=25 height=25/>
+                    </a>
+                    {% endif %}
+                {% endfor %}
+                </div>  
+                </td>
+            </tr>
+            {% endif %}
+            <tr class='timeline-modal-tweet-row5'>
+                <td>
+                <div class='timeline-modal-tweet-likes'>
+                    <form method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="timeline-modal-tweet-likes-btn" name="like" value="{{ tweet.pk }}">
+                        {% if tweet.like_set.all %}
+                        <i class='material-icons'>favorite_border</i>&nbsp;&nbsp;
+                        {{ tweet.like_set.all.count }}
+                        {% else %}
+                        <i class='material-icons'>favorite_border</i>&nbsp;&nbsp;
+                        {{ tweet.like_set.all.count }}
+                        {% endif %}
+                    </button>
+                    </form> 
+                </div> 
+                {% if tweet.tweet_author == user %}
+                <div class='timeline-modal-tweet-delete'>
+                    <a href="/delete/{{ tweet.pk }}/{{ user.username }}">
+                        Delete
+                    </a>
+                </div>
+                {% else %}
+                <td colspan='2'><div></div>
+                </td>
+                {% endif %}
+                </td>
+            </tr>
+        </table>
+        <div class='modal-replies-container'>
+            <table class="modal-replies">
+                {% if tweet.reply_set.all %}
+                {% for reply in tweet.reply_set.all %}
+                <tbody>
+                <tr class='modal-replies-row1'>
+                    <td>
+                    <div class='timeline-tweet-pic'>
+                        {% if reply.user.profile.picture %}
+                        <a href='/{{ reply.user }}'>
+                        <img src="{{ reply.user.profile.picture.url }}" width=50 height=50/>
+                        </a>
+                        {% else %}
+                        <a href='/{{ reply.user }}'>
+                        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=50 height=50/>
+                        </a>
+                        {% endif %}
+                    </div>
+                    </td>
+                    <td colspan='2'>
+                    <div class='timeline-tweet-author-date'>
+                        <a href="/{{ reply.user }}">
+                        <span class='timeline-tweet-author'>
+                            {{ reply.user }}</span></a>
+                        <span style='color:#657786;'>&middot;</span>
+                        <span class='timeline-tweet-date'>
+                            {{ reply.date_posted }}
+                        </span>
+                    </div>
+                    <div class='modal-reply-to'>
+                        Replying to <span class='modal-reply-to-user'><a href="/{{ tweet.tweet_author }}">{{ tweet.tweet_author }}</a></span>
+                    </div>
+                    </td>
+                </tr>
+                <tr class='modal-replies-row2'>
+                    <td>
+                    </td>
+                    <td colspan='2'>
+                    <div class='timeline-tweet-content'>
+                        {{ reply.reply_content }}
+                    </div>
+                    </td>
+                </tr>
+                <tr class='modal-replies-row3'>
+                    <td>
+                    </td>
+                    <td>
+                    <div class='modal-reply-likes'>
+                        <form method="POST">
+                        {% csrf_token %}
+                        <button type="submit" class="modal-reply-likes-btn" name="like-reply" value="{{ reply.pk }}">
+                            {% if reply.likereply_set.all %}
+                            <i class='material-icons'>favorite_border</i>&nbsp;&nbsp;
+                            {{ reply.likereply_set.all.count }}
+                            {% else %}
+                            <i class='material-icons'>favorite_border</i>&nbsp;&nbsp;
+                            {{ reply.likereply_set.all.count }}
+                            {% endif %}
+                        </button>
+                        </form> 
+                    </div> 
+                    </td>
+                    <td>
+                    {% if reply.user == user %}
+                    <div class='modal-reply-delete'>
+                        <a href="/delete_reply/{{ reply.pk }}/{{ tweet.pk }}/{{ user.username }}">
+                            Delete
+                        </a>
+                    </div>
+                    {% endif %}
+                    </td>
+                </tr>
+                </tbody>
+                {% endfor %}
+                {% endif %}
+            </table>
+        </div>
+    </div>
 {% endfor %}
-</ul>
-{% else %}
-No tweets with {{ search_term }}
-{% endif %}
 
 {% endblock %}

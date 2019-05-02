@@ -4,54 +4,126 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'feed/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'feed/images/favicon.ico' %}" type="image/png">
 </head>
 
 <body>
-
-    <nav>
-        <div class="nav-wrapper light-blue accent-2">
-          <a href="/" class="brand-logo left">Home</a>
-          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=122/></a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
+  <!-- NAVBAR -->
+  <div class='navbar-outter-wrap'>
+    <nav class='navbar'>
+        <div class="nav-inner-wrap nav-wrapper">
+          <ul class='nav-ul-1'>
             {% if user.is_authenticated %}
-              <li>
+            <li class='home-btn'>
+              <a id='home-btn-active' href="/">
+                <i class='material-icons'>home</i>
+                Home
+              </a>
+            </li>
+            <li class='navbar-logout'>
+              <a href='/logout'>
+                <i class='material-icons'>cancel</i>
+                Log out
+              </a>
+            </li>
+            {% else %}      
+            <li class='navbar-login'>
+              <a href='/login'>
+                <i class='material-icons'>check_circle</i>
+                Log In
+              </a>
+            </li>
+            <li class='navbar-register'>
+              <a href='/register'>
+                <i class='material-icons'>tag_faces</i>
+                Sign Up
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=40/></a>
+          <ul id="nav-mobile" class="nav-ul-2">
+            {% if user.is_authenticated %}
+              <li class='search-btn'>
                 <form method="GET">
                   {% csrf_token %}
-                  <div class="input-field">
-                    <input id="search" name='search' type="search" placeholder="Search Twittr" required>
-                    <button id='search'>Search</button>
-                    <label class="label-icon" for="search">
-                      <i class="material-icons">search</i>
-                    </label>
+                  <div class="search-input-div input-field">
+                    <input class='search-btn-field' id="search" name='search' type="search" placeholder="Search Twittr" required>
+                    <button class='search-submit-btn'><i class='material-icons'>search</i></button>
                   </div>
                 </form>
               </li>
-              <li>
-                <button data-target="tweet-nav" class="modal-trigger">
+              <li class='navbar-profile-link'>
+                {% if user.profile.picture %}
+                <a href="/{{ user.username }}">
+                  <img src="{{ user.profile.picture.url }}" width=30 height=30 />
+                </a>
+                {% else %}
+                <a href='/{{ user.username }}'>
+                  <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 height=30/>
+                </a>
+                {% endif %}
+              </li>
+              <li class='navbar-tweet-btn'>
+                <button data-target="tweet-nav" class="tweet-btn modal-trigger">
                   Tweet
                 </button>
               </li>
-              <li><a href="/{{ user.username }}">{{ user.username }}</a></li>
-              <li><a href='/logout'>Log out</a></li>
-            {% else %}      
-              <li><a href='/login'>Log in</a></li>
-              <li><a href='/register'>Register</a></li>
             {% endif %}
           </ul>
         </div>
       </nav>  
-    
-    {% if tweet_form %}
-    <div class="modal" id="tweet-nav">
-      <form method="POST">
-        {% csrf_token %}
-        {{ tweet_form }}
-        <button type="submit">Tweet</button>
-      </form>
-    </div>
-    {% endif %}
+  </div>
 
-    {% block content %}
-    {% endblock %}
+  <!-- TWEET MODAL -->
+  {% if tweet_form %}
+  <div class="modal" id="tweet-nav">
+    <div class='feed'>
+      <div>
+        <p class='nav-compose-tweet'>
+          Compose new Tweet
+        </p>
+      </div>
+      <div class='feed-tweet'>
+        <form class='feed-tweet-form' method="POST">
+            {% if user.profile.picture %}
+            <a href='/{{ user.username }}'>
+              <img src="{{ user.profile.picture.url }}" width=30 height=30 />
+            </a>
+            {% else %}
+            <a href='/{{ user.username }}'>
+              <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 height=30/>
+            </a>
+            {% endif %}
+            {% csrf_token %}
+            {{ tweet_form }}
+            <button class='tweet-btn' type="submit">Tweet</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% block content %}
+  {% endblock %}
+
+  <script>
+    $(document).ready(function(){
+      $('.modal').modal();
+      {% if op_tweet_pk %}
+        $('#tweet{{ op_tweet_pk}}').modal('open');
+      {% endif %}
+    });
+
+    $('a').click(function(event){
+      event.stopPropagation();
+    });
+
+    var homeBtn = document.getElementById('home-btn-active');
+    homeBtn.style.borderBottom = "2px solid #1DA1F2";
+    homeBtn.style.color = "#1DA1F2";
+  </script>
+
 </body>

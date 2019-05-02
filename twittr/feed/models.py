@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-# from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 
 def upload_to(instance, filename):
@@ -9,7 +8,7 @@ def upload_to(instance, filename):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    bio = models.TextField(max_length=280)
+    bio = models.TextField(max_length=140)
     picture = models.ImageField(upload_to=upload_to, blank=True)
 
     def __str__(self):
@@ -37,8 +36,8 @@ class Reply(models.Model):
     reply_content = models.CharField(max_length=280)
     date_posted = models.DateTimeField()
     
-    # def __str__(self):
-    #     return f'{self.user} reply to {self.op_tweet}'
+    def __str__(self):
+        return f'{self.user} reply to {self.op_tweet}'
 
 class LikeReply(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

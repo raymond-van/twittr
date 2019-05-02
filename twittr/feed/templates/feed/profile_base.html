@@ -4,119 +4,211 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="{% static 'feed/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'feed/images/favicon.ico' %}" type="image/png">
 </head>
 
 <body>
-
-    <nav>
-        <div class="nav-wrapper light-blue accent-2">
-          <a href="/" class="brand-logo left">Home</a>
-          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=122/></a>
-          <ul id="nav-mobile" class="right hide-on-med-and-down">
+  <!-- NAVBAR -->
+  <div class='navbar-outter-wrap'>
+    <nav class='navbar'>
+        <div class="nav-inner-wrap nav-wrapper">
+          <ul class='nav-ul-1'>
             {% if user.is_authenticated %}
-              <li>
+            <li class='home-btn'>
+              <a href="/">
+                <i class='material-icons'>home</i>
+                Home
+              </a>
+            </li>
+            <li class='navbar-logout'>
+              <a href='/logout'>
+                <i class='material-icons'>cancel</i>
+                Log out
+              </a>
+            </li>
+            {% else %}      
+            <li class='navbar-login'>
+              <a href='/login'>
+                <i class='material-icons'>check_circle</i>
+                Log in
+              </a>
+            </li>
+            <li class='navbar-register'>
+              <a href='/register'>
+                <i class='material-icons'>tag_faces</i>
+                Register
+              </a>
+            </li>
+            {% endif %}
+          </ul>
+          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=40/></a>
+          <ul id="nav-mobile" class="nav-ul-2">
+            {% if user.is_authenticated %}
+              <li class='search-btn'>
                 <form method="GET">
                   {% csrf_token %}
-                  <div class="input-field">
-                    <input id="search" name='search' type="search" placeholder="Search Twittr" required>
-                    <button id='search'>Search</button>
-                    <label class="label-icon" for="search">
-                      <i class="material-icons">search</i>
-                    </label>
+                  <div class="search-input-div input-field">
+                    <input class='search-btn-field' id="search" name='search' type="search" placeholder="Search Twittr" required>
+                    <button class='search-submit-btn'><i class='material-icons'>search</i></button>
                   </div>
                 </form>
               </li>
-              <li>
-                <button data-target="tweet-nav" class="modal-trigger">
+              <li class='navbar-profile-link'>
+                {% if user.profile.picture %}
+                <a href="/{{ user.username }}">
+                  <img src="{{ user.profile.picture.url }}" width=30 height=30 />
+                </a>
+                {% else %}
+                <a href='/{{ user.username }}'>
+                  <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 height=30/>
+                </a>
+                {% endif %}
+              </li>
+              <li class='navbar-tweet-btn'>
+                <button data-target="tweet-nav" class="tweet-btn modal-trigger">
                   Tweet
                 </button>
               </li>
-              <li><a href="/{{ user.username }}">{{ user.username }}</a></li>
-              <li><a href='/logout'>Log out</a></li>
-            {% else %}      
-              <li><a href='/login'>Log in</a></li>
-              <li><a href='/register'>Register</a></li>
             {% endif %}
           </ul>
         </div>
       </nav>  
+  </div>
     
-      {% if user.is_authenticated %}
-      {% if profile.profile.picture %}
-          <img src="{{ profile.profile.picture.url }}" width=100 />
-          {% if user.username == profile.username %}
+  <!-- PROFILE STATS -->
+  <div class='header-container'>
+    <div class='header-blue-bar'>
+    </div>
+    <nav class='header-navbar'>
+      <div class='header-stats'>
+      <ul class='header-stats-ul'>
+        <li class='profile-tweet-stat'>
+          <a id='profile-tweet-anchor' href='/{{ profile.username }}'>
+            <p>Tweets <br> <span id='profile-tweet-anchor-span' class='tweet-count'>{{ tweets.count }}</span></p>
+          </a>
+        </li>
+        <li class='profile-following-stat'>
+          <a id='profile-following-anchor' href='/{{ profile.username }}/following'>
+            <p>Following <br> <span id='profile-following-anchor-span' class='following-count'>{{ following.count }}</span></p>
+          </a>
+        </li>
+        <li class='profile-followers-stat'>
+          <a id='profile-followers-anchor' href='/{{ profile.username }}/followers'>
+              <p>Followers <br> <span id='profile-followers-anchor-span' class='follower-count'>{{ followers.count }}</span></p>
+          </a>
+        </li>
+      {% if user.username != profile.username %}
+        <li class='profile-follow-btn'>
           <form method="POST">
               {% csrf_token %}
-              {{ image_form }}
-              <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
-              <p><input type="submit" name='upload-pic' value="Upload" /></p>
+              {% if user_following_profile %}
+                  <input class='follow-btn' type='submit' name='unfollow' value='Unfollow' />
+              {% else %}
+                  <input class='follow-btn' type='submit' name='follow' value='Follow' />
+              {% endif %}
           </form>
-          {% endif %}
-      {% else %}
-          <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=100 />
-          {% if user.username == profile.username %}
-          <form method="POST">
-              {% csrf_token %}
-              {{ image_form }}
-              <!-- <input type='file' accept='image' name='change-pic' value="Change Picture" /> -->
-              <p><input type="submit" name='upload-pic' value="Upload" /></p>
-          </form>
-          {% endif %}
+        </li>
       {% endif %}
-      <h4>{{ profile.username }}'s Profile</h4>
+      </ul>
+      </div>
+    </nav>      
+  </div>    
+  <!-- <div> -->
 
+  <!-- PROFILE PIC + BIO -->
+  <div class='profile-pic-bio'>
+  {% if user.is_authenticated %}
+    {% if profile.profile.picture %}
+    <div class='profile-pic'>
+      <a class='modal-trigger' onclick="$('#modal-pic-form').modal('open');">
+        <img src="{{ profile.profile.picture.url }}" width=200 height=200/>
+      </a>
+    </div>
+    {% else %}
+    <div class='profile-pic'>
+      <a class='modal-trigger' onclick="$('#modal-pic-form').modal('open');">
+        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=200 height=200/>
+      </a>
+    </div>
+    {% endif %}
+    <div class='profile-bio'>
+      <p class='profile-bio-name'>{{ profile.username }}</p>
       {% if profile.profile.bio %}
-          <p>{{ profile.profile.bio }}</p>
-          {% if user.username == profile.username %}
-          <form method="POST">
-              {% csrf_token %}
-              <input type="submit" name='edit-bio' value="Edit Bio" />
-          </form>
-          {% endif %}
+        <p>{{ profile.profile.bio }}</p>
+        {% if user.username == profile.username %}
+        <form method="POST">
+            {% csrf_token %}
+            <input class='profile-bio-edit-btn' type="submit" name='edit-bio' value="Edit bio" />
+        </form>
+        {% endif %}
       {% elif user.username != profile.username%}
           <p>{{profile.username}} has not entered a bio.</p>
       {% else %}
-      <form method="POST">
-          {% csrf_token %}
-          {{ profile_form }}
-          <input type="submit" name='add-bio' value="Add Bio" />
-      </form>
+        <form method="POST">
+            {% csrf_token %}
+            {{ profile_form }}
+            <input class='profile-bio-edit-btn' type="submit" name='add-bio' value="Add bio" />
+        </form>
       {% endif %}
-  {% endif %}
-  
-  {% if user.username != profile.username %}
-      <form method="POST">
-          {% csrf_token %}
-          {% if user_following_profile %}
-              <input type='submit' name='unfollow' value='Unfollow' />
-          {% else %}
-              <input type='submit' name='follow' value='Follow' />
-          {% endif %}
-      </form>
-  {% endif %}
-  
-
-    {% if tweet_form %}
-    <div class="modal" id="tweet-nav">
-      <form method="POST">
-        {% csrf_token %}
-        {{ tweet_form }}
-        <button type="submit">Tweet</button>
-      </form>
     </div>
-    {% endif %}
+  {% endif %}
+  </div>
 
-    {% block content %}
-    
-    {% endblock %}
+  <!-- PROFILE PIC MODAL -->
+  {% if user.username == profile.username %}
+  <div class="modal profile-pic-form" id="modal-pic-form">
+    <form method="POST">
+        {% csrf_token %}
+        {{ image_form }}
+        <p><input type="submit" name='upload-pic' value="Upload" /></p>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- TWEET MODAL -->
+  {% if tweet_form %}
+  <div class="modal" id="tweet-nav">
+    <div class='feed'>
+      <div>
+        <p class='nav-compose-tweet'>
+          Compose new Tweet
+        </p>
+      </div>
+      <div class='feed-tweet'>
+        <form class='feed-tweet-form' method="POST">
+            {% if user.profile.picture %}
+            <a href='/{{ user.username }}'>
+              <img src="{{ user.profile.picture.url }}" width=30 height=30 />
+            </a>
+            {% else %}
+            <a href='/{{ user.username }}'>
+              <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 height=30/>
+            </a>
+            {% endif %}
+            {% csrf_token %}
+            {{ tweet_form }}
+            <button class='tweet-btn' type="submit">Tweet</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% block content %}
+  {% endblock %}
     
   <script>
       $(document).ready(function(){
           $('.modal').modal();
           {% if op_tweet_pk %}
-          $('#tweet{{ op_tweet_pk}}').modal('open');
+            $('#tweet{{ op_tweet_pk}}').modal('open');
           {% endif %}
+      });
+
+      $('a').click(function(event){
+        event.stopPropagation();
       });
   </script>
 </body>

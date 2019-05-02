@@ -1,35 +1,53 @@
 {% extends 'feed/profile_base.html' %}
+{% load static %}
 
 {% block content %}
 
 {% if following %}
-    <table>
-        <a href='/{{ profile.username }}'>
-            Tweets ({{ tweets.count }})
-        </a> |
-        <a href='/{{ profile.username }}/following' style='font-weight:bold;font-size:15px;'>
-            Following ({{ following.count }})
-        </a> |
-        <a href='/{{ profile.username }}/followers'>
-            Followers ({{ followers.count }})
-        </a>
-    {% for follow in following %}
-        <tr>
-            <td><a href="/{{ follow.followed }}">{{ follow.followed }}</a></td>
-        </tr>    
-    {% endfor %}
-    </table>
+    <!-- FOLLOWING LIST -->
+    <div class='following-grid'>
+        {% for follow in following reversed %}
+        <table class=profile-following>
+            <tr>
+                <td>
+                    <div class='feed-head-container'>
+                        <div class='feed-blue-bar-head'>
+                        </div>
+                        <div class='feed-user-head'>
+                            {% if follow.followed.profile.picture %}
+                            <a href='/{{ follow.followed.username }}'>
+                                <img src="{{ follow.followed.profile.picture.url }}" width=75 height=75/></a>
+                            {% else %}
+                            <a href='/{{ follow.followed.username }}'>
+                                <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=75 height=75/></a>
+                            {% endif %}
+                            <h4>
+                                <a href='/{{ follow.followed.username }}'>
+                                {{ follow.followed.username }}
+                                </a>
+                            </h4>
+                            <div class='feed-user-stats'>
+                                <p>
+                                    {{ follow.followed.profile.bio }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        {% endfor %}
+    </div>
 {% else %}
-    <a href='/{{ profile.username }}'>
-        Tweets ({{ tweets.count }})
-    </a> |
-    <a href='/{{ profile.username }}/following' style='font-weight:bold;font-size:15px;'>
-        Following ({{ following.count }})
-    </a> |
-    <a href='/{{ profile.username }}/followers'>
-        Followers ({{ followers.count }})
-    </a>
-    <p>{{ profile.username }} is not following anyone.</p>
+    <p class='no-stat'>{{ profile.username }} is not following anyone.</p>
 {% endif %}
+
+<script>
+    var following = document.getElementById('profile-following-anchor');
+    following.style.borderBottom = "2px solid #1DA1F2";
+
+    var followingSpan = document.getElementById('profile-following-anchor-span');
+    followingSpan.style.color = "#1DA1F2";
+</script>
 
 {% endblock %}

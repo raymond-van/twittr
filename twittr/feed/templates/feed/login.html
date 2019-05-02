@@ -1,12 +1,46 @@
 {% extends 'feed/base.html' %}
+{% load static %}
 
 {% block content %}
-  <h4>Log In</h4>
-  <form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Log In</button>
-  </form>
-
-  If you don't have an account, <a href='/register'><strong>register</strong></a>.
+  <div class='login-container'>
+    <!-- LOGIN LEFT PANEL -->
+    <div class='login-left'>
+      <img src="{% static 'feed/images/twittr_logo_large.png' %}" width="2000"/>
+      <div class='login-left-slogans'>
+        <p>
+          <i class=' material-icons'>search</i>&nbsp; Follow your interests.
+        </p>
+        <p>
+          <i class=' material-icons'>people_outline</i>&nbsp; Hear what people are talking about.
+        </p>
+        <p>
+          <i class=' material-icons'>chat_bubble_outline</i>&nbsp; Join the conversation.
+        </p>
+      </div>
+    </div>
+    <!-- LOGIN RIGHT PANEL -->
+    <div class='login-right'>
+      <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class='login-btn' type="submit">Log in</button>
+      </form>
+      <div class='login-right-slogans'>
+        <img src="{% static 'feed/images/twittr_logo.png' %}" width="110" />
+        <p>
+          <span>See what's happening in the world right now</span>
+        </p>
+        <p>
+          Join Twittr today.
+        </p>
+        <div class='register'>
+          <a class='register-btn' href='/register'>
+            <button onclick="window.location.href='/register'">
+              Sign Up
+            </button>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

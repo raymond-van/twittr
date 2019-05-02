@@ -24,20 +24,38 @@ def index(request):
     following = Follower.objects.select_related().filter(follower=user)
     feed_tweets = Tweet.objects.none()
 
+    # Timeline
     for follow in following:
         tweets = Tweet.objects.select_related().filter(tweet_author=follow.followed)
         feed_tweets = feed_tweets | tweets
     feed_tweets = feed_tweets | Tweet.objects.select_related().filter(tweet_author=user)
     feed_tweets = feed_tweets.order_by('-date_posted')
 
+    current_date = timezone.now()
+
+    # Modify timeline dates
+    for tweet in feed_tweets:
+        new_date = current_date - tweet.date_posted
+        if new_date.days > 0:
+            tweet.date_posted = tweet.date_posted.strftime('%b %d')
+        elif new_date.seconds > 3600:
+            tweet.date_posted = str(round((new_date.seconds / 3600))) + 'h'
+        elif new_date.seconds > 60:
+            tweet.date_posted = str(round((new_date.seconds / 60))) + 'm'
+        else:
+            tweet.date_posted = str(new_date.seconds) + 's'
+
+    # Handle searches
     search = request.GET.get('search')
     if search:
         url = '/search/' + search
         return redirect(url)
 
+    # Stats for header
     follower_count = Follower.objects.filter(followed=user).count()
     following_count = Follower.objects.filter(follower=user).count()
 
+    # Handle various requests
     if 'like' in request.POST:
         tweet_pk = request.POST['like']
         tweet = Tweet.objects.get(pk=tweet_pk)
@@ -50,7 +68,7 @@ def index(request):
         op_tweet = Tweet.objects.get(pk=op_tweet_pk)
         new_reply = request.POST['tweet'] # key is tweet bc using TweetForm
         Reply.objects.create(op_tweet=op_tweet, user=user, date_posted=timezone.now(),reply_content=new_reply)
-        return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet.pk})
+        return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet.pk, 'follower_count': follower_count, 'following_count': following_count})
     elif 'like-reply' in request.POST:
         reply_pk = request.POST['like-reply']
         reply = Reply.objects.get(pk=reply_pk)
@@ -58,7 +76,7 @@ def index(request):
         op_tweet_pk = reply.op_tweet.id
         if not created:
             LikeReply.objects.get(user=user,reply=reply).delete()
-        return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet_pk})
+        return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'op_tweet_pk': op_tweet_pk, 'follower_count': follower_count, 'following_count': following_count})
     elif request.POST:
         tweet_form = TweetForm(request.POST)
         if tweet_form.is_valid():
@@ -66,53 +84,10 @@ def index(request):
             Tweet.objects.create(tweet_content=new_tweet, tweet_author=user,date_posted=timezone.now())
             return HttpResponseRedirect(request.path_info)
     
-    return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'following_count': following_count, 'follower_count': follower_count})
-
-def search(request, search_term):
-    user_results = User.objects.filter(username__contains=search_term)
-    tweet_results = Tweet.objects.filter(tweet_content__contains=search_term)
-
-    search = request.GET.get('search')
-    if search:
-        url = '/search/' + search
-        return redirect(url)
-
-    return render(request, 'feed/search.html', {'search_term': search_term, 'user_results': user_results, 'tweet_results': tweet_results})
-
-def login_req(request):
-    if request.POST:
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('/')
-    form = AuthenticationForm()
-    return render(request, 'feed/login.html', {'form': form})
-
-def logout_req(request):
-    logout(request)
-    return redirect('/')
-
-def register(request):
-    if request.POST:
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('/')
-        else:
-            for msg in form.error_messages:
-                print(form.error_messages[msg])
-    form = UserCreationForm()
-    return render(request, 'feed/register.html', {'form': form})
+    return render(request, 'feed/feed.html', {'tweet_form': tweet_form, 'feed_tweets': feed_tweets, 'following_count': following_count, 'follower_count': follower_count, 'current_date': current_date, 'following': following})
 
 def profile(request, profile):
+    # Query for requested users data
     profile = User.objects.get(username=profile)
     tweets = Tweet.objects.select_related().filter(tweet_author=profile)
     following = Follower.objects.select_related().filter(follower=profile)
@@ -122,11 +97,27 @@ def profile(request, profile):
     image_form = ImageUploadForm()
     tweet_form = TweetForm()
 
+    current_date = timezone.now()
+
+    # Modify tweet dates
+    for tweet in tweets:
+        new_date = current_date - tweet.date_posted
+        if new_date.days > 0:
+            tweet.date_posted = tweet.date_posted.strftime('%b %d')
+        elif new_date.seconds > 3600:
+            tweet.date_posted = str(round((new_date.seconds / 3600))) + 'h'
+        elif new_date.seconds > 60:
+            tweet.date_posted = str(round((new_date.seconds / 60))) + 'm'
+        else:
+            tweet.date_posted = str(new_date.seconds) + 's'
+
+    # Handle searches
     search = request.GET.get('search')
     if search:
         url = '/search/' + search
         return redirect(url)
 
+    # Handle various requests
     if 'unfollow' in request.POST:
         Follower.objects.select_related().filter(follower=request.user).filter(followed=profile).delete()
         return HttpResponseRedirect(request.path_info)
@@ -189,11 +180,13 @@ def following(request, profile):
     image_form = ImageUploadForm()
     tweet_form = TweetForm()
 
+    # Handle searches
     search = request.GET.get('search')
     if search:
         url = '/search/' + search
         return redirect(url)
 
+    # Handle various requests
     if 'unfollow' in request.POST:
         Follower.objects.select_related().filter(follower=request.user).filter(followed=profile).delete()
         return HttpResponseRedirect(request.path_info)
@@ -233,11 +226,13 @@ def followers(request, profile):
     image_form = ImageUploadForm()
     tweet_form = TweetForm()
 
+    # Handle searches
     search = request.GET.get('search')
     if search:
         url = '/search/' + search
         return redirect(url)
 
+    # Handle various requests
     if 'unfollow' in request.POST:
         Follower.objects.select_related().filter(follower=request.user).filter(followed=profile).delete()
         return HttpResponseRedirect(request.path_info)
@@ -268,19 +263,69 @@ def followers(request, profile):
     return render(request, 'feed/profile_followers.html', {'profile': profile, 'tweets': tweets, 'following': following, 'followers': followers, 'user_following_profile': user_following_profile, 'profile_form': profile_form, 'image_form': image_form, 'tweet_form': tweet_form})
 
 def tweet_delete(request, tweet_pk, redirect_url):
+    # Delete tweet
     tweet = get_object_or_404(Tweet, pk=tweet_pk)
     tweet.delete()
+
+    # Redirect back to original place
     if redirect_url != 'feed':
         profile = '/' + redirect_url
         return redirect(profile)
     return redirect('/')
 
 def reply_delete(request, reply_pk, tweet_pk, redirect_url):
+    # Delete reply
     reply = get_object_or_404(Reply, pk=reply_pk)
     reply.delete()
+
+    # Redirect back to tweet modal
     op_tweet_pk = tweet_pk
     if redirect_url != 'feed':
         profile = '/' + redirect_url
         return redirect(profile)
     return redirect('/')
     
+def search(request, search_term):
+    # Gather results that include search term
+    user_results = User.objects.filter(username__contains=search_term)
+    tweet_results = Tweet.objects.filter(tweet_content__contains=search_term)
+
+    search = request.GET.get('search')
+    if search:
+        url = '/search/' + search
+        return redirect(url)
+
+    return render(request, 'feed/search.html', {'search_term': search_term, 'user_results': user_results, 'tweet_results': tweet_results})
+
+def login_req(request):
+    if request.POST:
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('/')
+    form = AuthenticationForm()
+    return render(request, 'feed/login.html', {'form': form})
+
+def logout_req(request):
+    logout(request)
+    return redirect('/')
+
+def register(request):
+    if request.POST:
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('/')
+        else:
+            for msg in form.error_messages:
+                print(form.error_messages[msg])
+    form = UserCreationForm()
+    return render(request, 'feed/register.html', {'form': form})
