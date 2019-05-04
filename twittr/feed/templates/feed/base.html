@@ -5,8 +5,8 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="{% static 'feed/style.css' %}">
-    <link rel="shortcut icon" href="{% static 'feed/images/favicon.ico' %}" type="image/png">
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+    <link rel="shortcut icon" href="{% static 'images/favicon.ico' %}" type="image/png">
 </head>
 
 <body>
@@ -43,7 +43,7 @@
             </li>
             {% endif %}
           </ul>
-          <a href="/" class="brand-logo center"><img src="{% static 'feed/images/twittr_logo.png' %}" width=40/></a>
+          <a href="/" class="brand-logo center"><img src="{% static 'images/twittr_logo.png' %}" width=40/></a>
           <ul id="nav-mobile" class="nav-ul-2">
             {% if user.is_authenticated %}
               <li class='search-btn'>
@@ -62,7 +62,7 @@
                 </a>
                 {% else %}
                 <a href='/{{ user.username }}'>
-                  <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 height=30/>
+                  <img src="{% static 'images/twittr_egg.jpg' %}" width=30 height=30/>
                 </a>
                 {% endif %}
               </li>
@@ -94,7 +94,7 @@
             </a>
             {% else %}
             <a href='/{{ user.username }}'>
-              <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=30 height=30/>
+              <img src="{% static 'images/twittr_egg.jpg' %}" width=30 height=30/>
             </a>
             {% endif %}
             {% csrf_token %}

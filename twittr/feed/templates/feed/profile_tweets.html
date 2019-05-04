@@ -25,7 +25,7 @@
                         </a>
                         {% else %}
                         <a href='/{{ tweet.tweet_author }}'>
-                            <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=50 height=50/>
+                            <img src="{% static 'images/twittr_egg.jpg' %}" width=50 height=50/>
                         </a>
                         {% endif %}
                     </div>
@@ -109,7 +109,7 @@
                     </a>
                     {% else %}
                     <a href='/{{ tweet.tweet_author }}'>
-                    <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=50 height=50/>
+                    <img src="{% static 'images/twittr_egg.jpg' %}" width=50 height=50/>
                     </a>
                     {% endif %}
                 </div>
@@ -164,7 +164,7 @@
                     </a>  
                     {% else %}
                     <a href='/{{ like.user }}'>
-                        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=25 height=25/>
+                        <img src="{% static 'images/twittr_egg.jpg' %}" width=25 height=25/>
                     </a>
                     {% endif %}
                 {% endfor %}
@@ -211,7 +211,7 @@
                 </a>
                 {% else %}
                 <a href='/{{ user.username }}'>
-                    <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=35 height=35/>
+                    <img src="{% static 'images/twittr_egg.jpg' %}" width=35 height=35/>
                 </a>
                 {% endif %}
                 </div>
@@ -240,7 +240,7 @@
                         </a>
                         {% else %}
                         <a href='/{{ reply.user }}'>
-                        <img src="{% static 'feed/images/twittr_egg.jpg' %}" width=50 height=50/>
+                        <img src="{% static 'images/twittr_egg.jpg' %}" width=50 height=50/>
                         </a>
                         {% endif %}
                     </div>
